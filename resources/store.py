@@ -1,3 +1,4 @@
+from flask_jwt_extended import jwt_optional, get_jwt_identity
 from flask_restful import Resource
 from models.store import StoreModel
 
@@ -29,5 +30,11 @@ class Store(Resource):
 
 class StoreList(Resource):
 
+    @jwt_optional
     def get(self):
-        return {'stores': [store.json() for store in StoreModel.find_all()]}
+        user_id = get_jwt_identity()
+        stores = [store.json() for store in StoreModel.find_all()]
+        if user_id:
+            return {'stores': stores}
+        else:
+            return {'stores': [store['name'] for store in stores]}
